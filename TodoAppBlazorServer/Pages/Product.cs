@@ -8,4 +8,20 @@ public class Product
     public string Product_Name { get; set; }
     public long Barcode { get; set; }
     public DateTime ExpiryDate { get; set; }
+
+    public Product(string product_Name)
+    {
+        Product_Name = product_Name;
+    }
+
+    public Product(string product_Name, long barcode, DateTime expiryDate)
+    {
+        Product_Name = product_Name;
+        Barcode = barcode;
+        ExpiryDate = expiryDate;
+    }
+
+    public Product()
+    {
+    }
 }

@@ -25,13 +25,13 @@ namespace LMS
         public IActionResult PostData([FromBody] string data)
         {
             var response = new { receivedData = data };
-            Task<string> result = TodoService.GET_Request(data);
+            Task<string> result = ProductService.GET_Request(data);
             result.Wait();
-            JObject responseJSON = TodoService.ConvertJsonStringToJsonObject(result.Result);
+            JObject responseJSON = ProductService.ConvertJsonStringToJsonObject(result.Result);
             int status = Convert.ToInt32((string)responseJSON.SelectToken("$.status"));
             Product product = null;
-            product = TodoService.ConvertJSONToProduct(responseJSON);
-            TodoService.AddItem(new TodoItem(product.Product_Name));
+            product = ProductService.ConvertJSONToProduct(responseJSON);
+            ProductService.AddItem(new Product(product.Product_Name));
             return Ok(status);
         }
     }

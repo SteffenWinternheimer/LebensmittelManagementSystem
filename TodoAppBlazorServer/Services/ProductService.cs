@@ -4,21 +4,13 @@ using System.Web;
 
 namespace LMS.Services;
 
-public class TodoService : ITodoService
+public class ProductService : IProductService
 {
-    private readonly IList<TodoItem> _todoItems;
-    public static List<TodoItem> TodoItems = new List<TodoItem>();
+    public static List<Product> ProductList = new List<Product>();
 
-    public TodoService()
+    public static void AddItem(Product product)
     {
-        _todoItems = new List<TodoItem> {
-            new TodoItem("Wash Clothes"),
-            new TodoItem("Clean Desk")
-        };
-    }
-    public static void AddItem(TodoItem item)
-    {
-        TodoItems.Add(item);
+        ProductList.Add(product);
     }
 
 
@@ -76,33 +68,23 @@ public class TodoService : ITodoService
         }
     }
 
-    public void Add(TodoItem item)
+    public void Add(Product item)
     {
-        _todoItems.Add(item);
+        ProductList.Add(item);
     }
 
-    public IEnumerable<TodoItem> GetAllItems()
+    public IEnumerable<Product> GetAllItems()
     {
-        return TodoItems;
+        return ProductList;
     }
 
-    public IEnumerable<TodoItem> GetAll()
+    public IEnumerable<Product> GetAll()
     {
-        return _todoItems.ToList();
+        return ProductList.ToList();
     }
 
-    public void Delete(TodoItem item)
+    public void Delete(Product item)
     {
-        _todoItems.Remove(item);
-    }
-
-    public void Complete(TodoItem item)
-    {
-        item.Completed = true;
-    }
-
-    public void Uncomplete(TodoItem item)
-    {
-        item.Completed = false;
+        ProductList.Remove(item);
     }
 }

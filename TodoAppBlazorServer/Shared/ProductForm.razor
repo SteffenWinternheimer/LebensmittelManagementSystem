@@ -1,5 +1,5 @@
 ﻿@using LMS.Services;
-@inject ITodoService _todoService;
+@inject IProductService _todoService;
 
 <EditForm Model="@NewItem" OnSubmit="@ItemAdded">
     <div style="display: flex; align-items: center; width: 400px;">
@@ -16,7 +16,7 @@
 
     private TodoItem NewItem = new TodoItem("");
     
-    public void ItemAdded(TodoItem item)
+    public void ItemAdded(Product item)
     {
         _todoService.Add(item);
 
@@ -28,7 +28,7 @@
 
     public void ItemAdded()
     {
-        var newItem = new TodoItem(NewItem.Text);
+        var newItem = new Product(NewItem.Text);
         NewItem.Text = "";
         _todoService.Add(newItem);
 

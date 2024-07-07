@@ -1,34 +1,23 @@
 ﻿@page "/"
 @using LMS.Services;
-@inject ITodoService _todoService;
+@inject IProductService _productService;
 
-<PageTitle>Todo List</PageTitle>
+<PageTitle>Shopping List</PageTitle>
 
 <div class="border" style="padding: 20px;">
-    <h4>New Item</h4>
-    <TodoItemForm OnItemAdded="@ItemsChanged" />
+    <h4>New Product</h4>
+    <ProductForm OnItemAdded="@ItemsChanged" />
 </div>
 
+@* Listed products *@
 <div class="border" style="padding: 20px; margin-top: 20px;">
     <div style="display: flex; flex-direction: column">
-        @foreach (var todo in Todos)
+        @foreach (var todo in Products)
         {
             <div style="display: flex; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center;margin-bottom: 10px;">
-                    <div class="@ItemClass(todo)" style="width: 280px;">@todo.Text</div>
+                    <div class="@ItemClass(todo)" style="width: 280px;">@todo.Product_Name</div>
                 </div>
-                @if (todo.Completed)
-                {
-                    <div style="width: 120px">
-                        <button class="btn btn-primary" onclick="@(() => UncompleteItem(todo))">Uncomplete</button>
-                    </div>
-                }
-                @if (!todo.Completed)
-                {
-                    <div style="width: 120px">
-                        <button class="btn btn-primary" onclick="@(() => CompleteItem(todo))">Complete</button>
-                    </div>
-                }
                 <div>
                     <button class="btn btn-danger" onclick="@(() => DeleteItem(todo))">Delete</button>
                 </div>
@@ -38,39 +27,27 @@
 </div>
 
 @code {
-    private IList<TodoItem> Todos { get; set; } = new List<TodoItem>();
+    private IList<Product> Products { get; set; } = new List<Product>();
 
     protected override void OnInitialized()
     {
-        Todos = _todoService.GetAllItems().ToList();
+        Products = _productService.GetAllItems().ToList();
     }
 
-    public string ItemClass(TodoItem item)
+    public string ItemClass(Product item)
     {
-        return item.Completed ? "item-completed" : "";
+        return "";
     }
 
     public void ItemsChanged()
     {
-        Todos = _todoService.GetAll().ToList();
+        Products = _productService.GetAll().ToList();
         StateHasChanged();
     }
 
-    public void DeleteItem(TodoItem item)
+    public void DeleteItem(Product item)
     {
-        _todoService.Delete(item);
-        ItemsChanged();
-    }
-
-    public void CompleteItem(TodoItem item)
-    {
-        _todoService.Complete(item);
-        ItemsChanged();
-    }
-
-    public void UncompleteItem(TodoItem item)
-    {
-        _todoService.Uncomplete(item);
+        _productService.Delete(item);
         ItemsChanged();
     }
 }
