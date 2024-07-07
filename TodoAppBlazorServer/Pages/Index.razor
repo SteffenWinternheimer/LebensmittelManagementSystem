@@ -42,7 +42,7 @@
 
     protected override void OnInitialized()
     {
-        Todos = _todoService.GetAll().ToList();
+        Todos = _todoService.GetAllItems().ToList();
     }
 
     public string ItemClass(TodoItem item)

@@ -15,6 +15,16 @@
     public required Action OnItemAdded { get; set; }
 
     private TodoItem NewItem = new TodoItem("");
+    
+    public void ItemAdded(TodoItem item)
+    {
+        _todoService.Add(item);
+
+        if (OnItemAdded != null)
+        {
+            OnItemAdded();
+        }
+    }
 
     public void ItemAdded()
     {

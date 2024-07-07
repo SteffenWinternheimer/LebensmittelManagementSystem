@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LMS.Services;
+using LMS.Shared;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace LMS
 {
@@ -21,8 +24,15 @@ namespace LMS
         [HttpPost("postdata")]
         public IActionResult PostData([FromBody] string data)
         {
-            var response = new { message = "Hello from POST", receivedData = data };
-            return Ok(response);
+            var response = new { receivedData = data };
+            Task<string> result = TodoService.GET_Request(data);
+            result.Wait();
+            JObject responseJSON = TodoService.ConvertJsonStringToJsonObject(result.Result);
+            int status = Convert.ToInt32((string)responseJSON.SelectToken("$.status"));
+            Product product = null;
+            product = TodoService.ConvertJSONToProduct(responseJSON);
+            TodoService.AddItem(new TodoItem(product.Product_Name));
+            return Ok(status);
         }
     }
 }
