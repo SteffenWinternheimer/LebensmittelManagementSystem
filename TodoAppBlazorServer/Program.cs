@@ -13,13 +13,16 @@ foreach (var ip in host.AddressList)
         ipAddress = ip.ToString();
     }
 }
-builder.WebHost.UseUrls("http://"+ipAddress+":5003", "http://localhost:5001");
+string url = "http://" + ipAddress + ":5003";
+builder.WebHost.UseUrls(url, "http://localhost:5001");
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<ITodoService, TodoService>();
-
 var app = builder.Build();
+
+
+app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 
 if (!app.Environment.IsDevelopment())
 {
