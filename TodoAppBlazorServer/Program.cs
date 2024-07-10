@@ -18,7 +18,7 @@ builder.WebHost.UseUrls(url, "http://localhost:5001");
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<ITodoService, TodoService>();
+builder.Services.AddSingleton<IProductService, ProductService>();
 var app = builder.Build();
 
 
