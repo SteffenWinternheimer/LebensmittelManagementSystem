@@ -3,11 +3,11 @@ using LMS.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
-namespace LMS
+namespace LMS.Logic
 {
     [Route("/")]
     [ApiController]
-    public class TestController : ControllerBase
+    public class APIProduct_Controller : ControllerBase
     {
         [HttpGet("getdata")]
         public IActionResult GetData()

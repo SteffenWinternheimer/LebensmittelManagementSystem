@@ -21,7 +21,6 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<IProductService, ProductService>();
 var app = builder.Build();
 
-
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 
 if (!app.Environment.IsDevelopment())
