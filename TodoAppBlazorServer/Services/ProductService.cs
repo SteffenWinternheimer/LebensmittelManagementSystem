@@ -41,7 +41,7 @@ public class ProductService : IProductService
             productName = (string)jObject.SelectToken("$.product.product_name_fr");
             productName = Translate(productName);
         }
-
+        Statistics.TotalScannedProducts++;
         product.Product_Name = productName;
         return product;
     }

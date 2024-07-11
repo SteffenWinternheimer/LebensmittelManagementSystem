@@ -1,15 +1,21 @@
-﻿@page "/"
+﻿@page "/home"
 @using LMS.Services;
 @inject IProductService _productService;
 
-<PageTitle>Shopping List</PageTitle>
+<PageTitle>Food management system</PageTitle>
 
+<h3>Welcome to the food management system!</h3>
+
+
+ 
 <div class="border" style="padding: 20px;">
     <h4>New Product</h4>
     <ProductForm OnItemAdded="@ItemsChanged" />
 </div>
 
-@* Listed products *@
+
+
+
 <div class="border" style="padding: 20px; margin-top: 20px;">
     <div style="display: flex; flex-direction: column">
         @foreach (var todo in Products)
@@ -50,4 +56,4 @@
         _productService.Delete(item);
         ItemsChanged();
     }
-}
+} 
