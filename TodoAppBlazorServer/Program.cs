@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using LMS.Services;
 using System.Net;
+using LMS.Logic;
+using LMS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,5 +36,10 @@ app.UseStaticFiles();
 app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+//Statistics.statisticsDic = FileHandler.LoadStatistics();
+ProductService.InitializeLists();
+Statistics.LoadStatistics();
+
 
 app.Run();

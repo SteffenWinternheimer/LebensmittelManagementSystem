@@ -1,6 +1,10 @@
 ﻿@page "/shoppinglist"
+@using LMS.Services;
+
 <h3>ShoppingList</h3>
-
-@code {
-
+@foreach(var product in ProductService.GetShoppingList())
+{
+    <div>@product.Product_Name</div>
 }
+
+

@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using LMS.Logic;
+using Newtonsoft.Json.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Web;
 
 namespace LMS.Services;
@@ -7,12 +9,14 @@ namespace LMS.Services;
 public class ProductService : IProductService
 {
     public static List<Product> ProductList = new List<Product>();
+    public static List<Product> ShoppingList = new List<Product>();
+    public static List<Product> FoodStock = new List<Product>();
 
-    public static void AddItem(Product product)
+    public static void InitializeLists()
     {
-        ProductList.Add(product);
+        FoodStock = new List<Product>(GetFoodStock());
+        ShoppingList = new List<Product>(GetShoppingList());
     }
-
 
     public static async Task<string> GET_Request(string barcodeID)
     {
@@ -41,7 +45,6 @@ public class ProductService : IProductService
             productName = (string)jObject.SelectToken("$.product.product_name_fr");
             productName = Translate(productName);
         }
-        Statistics.TotalScannedProducts++;
         product.Product_Name = productName;
         return product;
     }
@@ -68,6 +71,31 @@ public class ProductService : IProductService
         }
     }
 
+    public static void AddItemToFoodStock(Product item)
+    {
+        Statistics.IncrementTotalScannedProducts();
+        Statistics.IncrementTotalScannedProductsFoodStock();
+        FoodStock.Add(item);
+        FileHandler.SaveList(FoodStock, "FoodStock");
+    }
+
+    public static void AddItemToShoppingList(Product item)
+    {
+        Statistics.IncrementTotalScannedProducts();
+        Statistics.IncrementTotalScannedProductsShoppingList();
+        ShoppingList.Add(item);
+        FileHandler.SaveList(ShoppingList, "ShoppingList");
+    }
+
+    public static IEnumerable<Product> GetShoppingList()
+    {
+        return FileHandler.LoadList("ShoppingList");
+    }
+    public static IEnumerable<Product> GetFoodStock()
+    {
+        return FileHandler.LoadList("FoodStock");
+    }
+
     public void Add(Product item)
     {
         ProductList.Add(item);
@@ -87,4 +115,5 @@ public class ProductService : IProductService
     {
         ProductList.Remove(item);
     }
+
 }

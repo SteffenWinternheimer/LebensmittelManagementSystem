@@ -9,20 +9,34 @@ namespace LMS.Logic
     [ApiController]
     public class APIProduct_Controller : ControllerBase
     {
-        [HttpGet("getdata")]
-        public IActionResult GetData()
-        {
-            return Ok(new { data = new { foo = "blablub" } });
-        }
+        //[HttpGet("getdata")]
+        //public IActionResult GetData()
+        //{
+        //    return Ok(new { data = new { foo = "blablub" } });
+        //}
 
-        [HttpGet("getdata2")]
-        public IActionResult GetData2()
-        {
-            return Ok(new { data = new { foo = "blablub2" } });
-        }
+        //[HttpGet("getdata2")]
+        //public IActionResult GetData2()
+        //{
+        //    return Ok(new { data = new { foo = "blablub2" } });
+        //}
 
-        [HttpPost("postdata")]
-        public IActionResult PostData([FromBody] string data)
+        //[HttpPost("postdata")]
+        //public IActionResult PostData([FromBody] string data)
+        //{
+        //    var response = new { receivedData = data };
+        //    Task<string> result = ProductService.GET_Request(data);
+        //    result.Wait();
+        //    JObject responseJSON = ProductService.ConvertJsonStringToJsonObject(result.Result);
+        //    int status = Convert.ToInt32((string)responseJSON.SelectToken("$.status"));
+        //    Product product = null;
+        //    product = ProductService.ConvertJSONToProduct(responseJSON);
+        //    ProductService.AddItem(new Product(product.Product_Name));
+        //    return Ok(status);
+        //}
+
+        [HttpPost("PostProductToShoppingList")]
+        public IActionResult PostProductToShoppingList([FromBody] string data)
         {
             var response = new { receivedData = data };
             Task<string> result = ProductService.GET_Request(data);
@@ -31,7 +45,21 @@ namespace LMS.Logic
             int status = Convert.ToInt32((string)responseJSON.SelectToken("$.status"));
             Product product = null;
             product = ProductService.ConvertJSONToProduct(responseJSON);
-            ProductService.AddItem(new Product(product.Product_Name));
+            ProductService.AddItemToShoppingList(product);
+            return Ok(status);
+        }
+
+        [HttpPost("PostProductToFoodStock")]
+        public IActionResult PostProductToFoodStock([FromBody] string data)
+        {
+            var response = new { receivedData = data };
+            Task<string> result = ProductService.GET_Request(data);
+            result.Wait();
+            JObject responseJSON = ProductService.ConvertJsonStringToJsonObject(result.Result);
+            int status = Convert.ToInt32((string)responseJSON.SelectToken("$.status"));
+            Product product = null;
+            product = ProductService.ConvertJSONToProduct(responseJSON);
+            ProductService.AddItemToFoodStock(product);
             return Ok(status);
         }
     }
