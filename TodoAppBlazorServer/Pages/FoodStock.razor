@@ -1,9 +1,20 @@
 ﻿@page "/foodstock"
 @using LMS.Services;
+@using LMS.Shared;
+@using LMS.Models;
 
 <h3>FoodStock</h3>
+<p>This page shows all of your products currently available in your food stock!</p>
+
+
 @foreach (var product in ProductService.GetFoodStock())
 {
-    <div>@product.Product_Name</div>
+    <ProductDisplay Product="@product" OnProductRemoved="@RemoveProduct" />
 }
 
+@code {
+    private void RemoveProduct(Product product)
+    {
+        ProductService.RemoveProduct(product, ListTypesEnum.ListTypes.FoodStock);
+    }
+}

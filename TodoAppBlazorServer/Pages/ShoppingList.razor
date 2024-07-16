@@ -1,10 +1,21 @@
 ﻿@page "/shoppinglist"
 @using LMS.Services;
+@using LMS.Shared;
+@using LMS.Models;
 
 <h3>ShoppingList</h3>
+
+ 
 @foreach(var product in ProductService.GetShoppingList())
 {
-    <div>@product.Product_Name</div>
+    <ProductDisplay Product="@product" OnProductRemoved="@RemoveProduct" />
+} 
+
+
+
+@code {
+    private void RemoveProduct(Product product)
+    {
+        ProductService.RemoveProduct(product, ListTypesEnum.ListTypes.ShoppingList);
+    }
 }
-
-
