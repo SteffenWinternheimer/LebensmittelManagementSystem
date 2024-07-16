@@ -13,6 +13,9 @@ public class ProductService : IProductService
     public static List<Product> ShoppingList = new List<Product>();
     public static List<Product> FoodStock = new List<Product>();
 
+    public static Dictionary<string, int> ProductQuantityShoppingList = new Dictionary<string, int>();
+    public static Dictionary<string, int> ProductQuantityFoodStock = new Dictionary<string, int>();
+
     public const string SHOPPING_LIST = "ShoppingList";
     public const string FOOD_STOCK = "FoodStock";
 
@@ -75,17 +78,19 @@ public class ProductService : IProductService
         }
     }
 
-    public static bool RemoveProduct(Product product, ListTypesEnum.ListTypes listType)
+    public static bool RemoveProduct(string productName, ListTypesEnum.ListTypes listType)
     {
         switch (listType)
         {
             case ListTypesEnum.ListTypes.ShoppingList:
-                ShoppingList.Remove(product);
+                ShoppingList.Remove(ShoppingList.Find(item => item.Product_Name.Equals(productName)));
                 FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
+                ShoppingListToDictionary();
                 return true;
             case ListTypesEnum.ListTypes.FoodStock:
-                FoodStock.Remove(product);
+                FoodStock.Remove(FoodStock.Find(item => item.Product_Name.Equals(productName)));
                 FileHandler.SaveList(FoodStock, FOOD_STOCK);
+                FoodStockToDictionary();
                 return true;
         }
         return false;
@@ -124,6 +129,35 @@ public class ProductService : IProductService
     public static IEnumerable<Product> GetFoodStock()
     {
         return FoodStock;
+    }
+
+    public static void ShoppingListToDictionary()
+    {
+        ProductQuantityShoppingList.Clear();
+        //find diplicates in shopping list (Product_Name)
+        var duplicates = ShoppingList.GroupBy(x => x.Product_Name)
+            .Where(group => group.Count() > 0)
+            .Select(group => group.Key);
+        //show quantity of duplicates and product name of each duplicate
+        foreach ( var item in duplicates) {
+            int quantity = ShoppingList.Count(x => x.Product_Name == item);
+            ProductQuantityShoppingList.Add(item.ToString(), quantity);
+        }
+    }
+
+    public static void FoodStockToDictionary()
+    {
+        ProductQuantityFoodStock.Clear();
+        //find diplicates in shopping list (Product_Name)
+        var duplicates = FoodStock.GroupBy(x => x.Product_Name)
+            .Where(group => group.Count() > 0)
+            .Select(group => group.Key);
+        //show quantity of duplicates and product name of each duplicate
+        foreach (var item in duplicates)
+        {
+            int quantity = FoodStock.Count(x => x.Product_Name == item);
+            ProductQuantityFoodStock.Add(item.ToString(), quantity);
+        }
     }
 
     public void Add(Product item)

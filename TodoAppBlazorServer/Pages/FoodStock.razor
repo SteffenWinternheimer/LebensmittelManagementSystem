@@ -7,14 +7,21 @@
 <p>This page shows all of your products currently available in your food stock!</p>
 
 
-@foreach (var product in ProductService.GetFoodStock())
+@foreach (var product in ProductService.ProductQuantityFoodStock)
 {
-    <ProductDisplay Product="@product" OnProductRemoved="@RemoveProduct" />
+    <ProductDisplay Product_Name="@product.Key" Quantity="@product.Value" OnProductRemoved="@RemoveProduct" />
 }
 
 @code {
-    private void RemoveProduct(Product product)
+
+    protected override void OnInitialized()
     {
-        ProductService.RemoveProduct(product, ListTypesEnum.ListTypes.FoodStock);
+        ProductService.FoodStockToDictionary();
+    }
+
+
+    private void RemoveProduct(string productName)
+    {
+        ProductService.RemoveProduct(productName, ListTypesEnum.ListTypes.FoodStock);
     }
 }

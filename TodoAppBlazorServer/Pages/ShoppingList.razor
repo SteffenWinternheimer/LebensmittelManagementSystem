@@ -6,16 +6,24 @@
 <h3>ShoppingList</h3>
 
  
-@foreach(var product in ProductService.GetShoppingList())
+@foreach(var product in ProductService.ProductQuantityShoppingList)
 {
-    <ProductDisplay Product="@product" OnProductRemoved="@RemoveProduct" />
+    <ProductDisplay Product_Name="@product.Key" Quantity="@product.Value" OnProductRemoved="@RemoveProduct" />
 } 
 
 
 
 @code {
-    private void RemoveProduct(Product product)
+
+    protected override void OnInitialized()
     {
-        ProductService.RemoveProduct(product, ListTypesEnum.ListTypes.ShoppingList);
+        ProductService.ShoppingListToDictionary();
+    }
+
+    private void RemoveProduct(string productName)
+    {
+        Console.WriteLine("RemoveProduct" + productName);
+        ProductService.RemoveProduct(productName, ListTypesEnum.ListTypes.ShoppingList);
+        StateHasChanged();
     }
 }
