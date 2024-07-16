@@ -147,6 +147,32 @@ public class ProductService : IProductService
         return FoodStock;
     }
 
+    public static DateOnly GetLatestExpirationDate(string productName, ListTypesEnum.ListTypes listType)
+    {
+        List<Product> productList = new List<Product>();
+        switch (listType)
+        {
+            case ListTypesEnum.ListTypes.ShoppingList:
+                productList = GetShoppingList().Where(product => product.Product_Name.Equals(productName)).ToList();
+                break;
+
+            case ListTypesEnum.ListTypes.FoodStock:
+                productList = GetFoodStock().Where(product => product.Product_Name.Equals(productName)).ToList();
+                break;
+        }
+
+        DateOnly latestExpirationDate = productList[0].ExpiryDate;
+        foreach (var product in productList)
+        {
+            if (product.ExpiryDate > latestExpirationDate)
+            {
+                latestExpirationDate = product.ExpiryDate;
+            }
+        }
+        return latestExpirationDate;
+    }
+
+
     public static void ShoppingListToDictionary()
     {
         ProductQuantityShoppingList.Clear();

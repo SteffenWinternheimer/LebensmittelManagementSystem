@@ -4,9 +4,11 @@
 <div class="productDisplay">
     <p>@Product_Name </p>
     <p>@Quantity</p>
+    <p>@ExpirationDate</p>
 
         <div class="buttonContainer">
             <button @onclick="RemoveQuantity"><i class="material-icons">delete</i></button>
+            <button @onclick="EditExpirationDate"><i class="material-icons">edit_calendar</i></button>
             <button @onclick="MoveProduct"><i class="material-icons">input</i></button>
         </div>
  
@@ -21,10 +23,22 @@
     public int Quantity { get; set; }
 
     [Parameter]
+    public DateOnly ExpirationDate { get; set; }
+
+    [Parameter]
     public EventCallback<string> OnProductRemoved { get; set; }
 
     [Parameter]
     public EventCallback<string> OnProductMoved { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnExpirationDateChanged { get; set; }
+
+    private async Task EditExpirationDate()
+    {
+        await OnExpirationDateChanged.InvokeAsync(Product_Name);
+        StateHasChanged();
+    }
 
     private async Task RemoveQuantity()
     {

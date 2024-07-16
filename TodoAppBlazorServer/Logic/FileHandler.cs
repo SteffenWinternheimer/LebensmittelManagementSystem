@@ -30,7 +30,11 @@ namespace LMS.Logic
 
         public static List<Product> LoadList(string listName)
         {
-            if (!File.Exists("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\" + listName + ".json")) return new List<Product>();
+            if (!File.Exists("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\" + listName + ".json"))
+            {
+                SaveList(new List<Product>(), listName);
+                return new List<Product>();
+            }
             string fileContent = File.ReadAllText("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\" + listName + ".json");
             JArray jArrayList = JArray.Parse(fileContent);
             List<Product> productList = new List<Product>();

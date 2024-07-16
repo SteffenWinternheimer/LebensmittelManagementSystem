@@ -9,16 +9,25 @@
 
 @foreach (var product in ProductService.ProductQuantityFoodStock)
 {
-    <ProductDisplay Product_Name="@product.Key" Quantity="@product.Value" OnProductRemoved="@RemoveProduct" OnProductMoved="@MoveProductToOtherList"/>
+    <ProductDisplay Product_Name="@product.Key" Quantity="@product.Value" ExpirationDate="@GetLatestExpirationDate(product.Key)" OnProductRemoved="@RemoveProduct" OnExpirationDateChanged="@EditExpirationDate"  OnProductMoved="@MoveProductToOtherList" />
 }
 
 @code {
+    private DateOnly GetLatestExpirationDate(string productName)
+    {
+        return ProductService.GetLatestExpirationDate(productName, ListTypesEnum.ListTypes.FoodStock);
+    }
 
     protected override void OnInitialized()
     {
         ProductService.FoodStockToDictionary();
     }
 
+    private void EditExpirationDate()
+    {
+        Console.WriteLine("EditExpirationDate");
+        StateHasChanged();
+    }
 
     private void RemoveProduct(string productName)
     {
