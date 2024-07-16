@@ -4,7 +4,12 @@
 <div class="productDisplay">
     <p>@Product_Name </p>
     <p>@Quantity</p>
-    <button class="product-button" @onclick="RemoveQuantity">Remove Quantity</button>
+
+        <div class="buttonContainer">
+            <button @onclick="RemoveQuantity"><i class="material-icons">delete</i></button>
+            <button @onclick="MoveProduct"><i class="material-icons">input</i></button>
+        </div>
+ 
 </div> 
 
 
@@ -18,15 +23,19 @@
     [Parameter]
     public EventCallback<string> OnProductRemoved { get; set; }
 
+    [Parameter]
+    public EventCallback<string> OnProductMoved { get; set; }
+
     private async Task RemoveQuantity()
     {
-        RemoveProduct();
+        await OnProductRemoved.InvokeAsync(Product_Name);
         StateHasChanged();
     }
 
-
-    private async Task RemoveProduct()
+    private async Task MoveProduct()
     {
-        await OnProductRemoved.InvokeAsync(Product_Name);
+        await OnProductMoved.InvokeAsync(Product_Name);
+        StateHasChanged();
     }
+
 }

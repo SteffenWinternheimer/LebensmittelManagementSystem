@@ -96,6 +96,22 @@ public class ProductService : IProductService
         return false;
     }
 
+    public static void MoveProduct(string productName, ListTypesEnum.ListTypes listToMoveProductTo)
+    {
+        switch (listToMoveProductTo)
+        {
+            case ListTypesEnum.ListTypes.FoodStock:
+                AddItemToFoodStock(new Product(productName));
+                Console.WriteLine("Move Product to Food Stock");
+                break;
+            case ListTypesEnum.ListTypes.ShoppingList:
+                AddItemToShoppingList(new Product(productName));
+                Console.WriteLine("Move Product to Shopping List");
+                break;
+        }
+    }
+
+
     public static void AddItemToFoodStock(Product item)
     {
         Statistics.IncrementTotalScannedProducts();
