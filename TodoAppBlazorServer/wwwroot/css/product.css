@@ -1,4 +1,23 @@
-﻿.product-button {
+﻿.productDisplay {
+    border: 1px solid black;
+    padding: 10px;
+    background-color: lightgray;
+    float: left;
+    margin-right: 10px;
+    width: 250px;
+    margin-bottom: 10px;
+}
+
+.productDisplay p {
+    text-align: center;
+}
+
+.productDisplay button {
+    margin: 0 auto;
+    display: block;
+}
+
+.product-button {
     background: #5E5DF0;
     border-radius: 999px;
     box-shadow: #5E5DF0 0 10px 20px -10px;

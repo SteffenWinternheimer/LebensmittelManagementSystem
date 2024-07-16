@@ -1,9 +1,10 @@
 ﻿@using LMS.Services;
 @using LMS.Models;
 
-@* <div class="@CheckExpiryDate()"> *@
-<div>
-    <p>Product Name: @Product_Name Quantity: @Quantity <button @onclick="RemoveQuantity">Remove Quantity</button></p>
+<div class="productDisplay">
+    <p>@Product_Name </p>
+    <p>@Quantity</p>
+    <button class="product-button" @onclick="RemoveQuantity">Remove Quantity</button>
 </div> 
 
 
@@ -23,18 +24,9 @@
         StateHasChanged();
     }
 
-    // protected override void OnInitialized()
-    // {
-    //     CheckExpiryDate();
-    // }
 
     private async Task RemoveProduct()
     {
         await OnProductRemoved.InvokeAsync(Product_Name);
     }
-
-    // private string CheckExpiryDate()
-    // {
-    //     return Product?.ExpiryDate < DateTime.Now ? "expired" : "not-expired";
-    // }
 }
