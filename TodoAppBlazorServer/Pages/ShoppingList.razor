@@ -8,7 +8,7 @@
  
 @foreach(var product in ProductService.ProductQuantityShoppingList)
 {
-    <ProductDisplay Product_Name="@product.Key" Quantity="@product.Value" OnProductRemoved="@RemoveProduct" />
+    <ProductDisplay Product_Name="@product.Key" Quantity="@product.Value" OnProductRemoved="@RemoveProduct" OnProductMoved="@MoveProductToOtherList"/>
 } 
 
 
@@ -22,8 +22,15 @@
 
     private void RemoveProduct(string productName)
     {
-        Console.WriteLine("RemoveProduct" + productName);
         ProductService.RemoveProduct(productName, ListTypesEnum.ListTypes.ShoppingList);
+        StateHasChanged();
+    }
+
+    private void MoveProductToOtherList(string productName)
+    {
+        RemoveProduct(productName);
+        Console.WriteLine("MoveProductToOtherList" + productName);
+        ProductService.MoveProduct(productName, ListTypesEnum.ListTypes.FoodStock);
         StateHasChanged();
     }
 }
