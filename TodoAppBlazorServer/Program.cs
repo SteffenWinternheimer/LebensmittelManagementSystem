@@ -3,6 +3,7 @@ using LMS.Services;
 using System.Net;
 using LMS.Logic;
 using LMS;
+using Blazored.Modal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.WebHost.UseUrls(url, "http://localhost:5001");
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<IProductService, ProductService>();
+builder.Services.AddBlazoredModal();
 var app = builder.Build();
 
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");

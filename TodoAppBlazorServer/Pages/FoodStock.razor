@@ -2,6 +2,7 @@
 @using LMS.Services;
 @using LMS.Shared;
 @using LMS.Models;
+@using LMS.Pages;
 
 <h3>FoodStock</h3>
 <p>This page shows all of your products currently available in your food stock!</p>
@@ -9,10 +10,11 @@
 
 @foreach (var product in ProductService.ProductQuantityFoodStock)
 {
-    <ProductDisplay Product_Name="@product.Key" Quantity="@product.Value" ExpirationDate="@GetLatestExpirationDate(product.Key)" OnProductRemoved="@RemoveProduct" OnExpirationDateChanged="@EditExpirationDate"  OnProductMoved="@MoveProductToOtherList" />
+    <ProductDisplay Product_Name="@product.Key" Quantity="@product.Value" ExpirationDate="@GetLatestExpirationDate(product.Key)" OnProductRemoved="@RemoveProduct" OnExpirationDateChanged="@(date => EditExpirationDate(product.Key,date))" OnProductMoved="@MoveProductToOtherList" />
 }
 
 @code {
+
     private DateOnly GetLatestExpirationDate(string productName)
     {
         return ProductService.GetLatestExpirationDate(productName, ListTypesEnum.ListTypes.FoodStock);
@@ -23,9 +25,9 @@
         ProductService.FoodStockToDictionary();
     }
 
-    private void EditExpirationDate()
+    private void EditExpirationDate(string productName, DateOnly expirationDate)
     {
-        Console.WriteLine("EditExpirationDate");
+        ProductService.UpdateExpirationDateToProduct(productName, expirationDate, ListTypesEnum.ListTypes.ShoppingList);
         StateHasChanged();
     }
 
@@ -36,9 +38,8 @@
 
     private void MoveProductToOtherList(string productName)
     {
-        RemoveProduct(productName);
-        Console.WriteLine("MoveProductToOtherList" + productName);
         ProductService.MoveProduct(productName, ListTypesEnum.ListTypes.ShoppingList);
+        RemoveProduct(productName);
         StateHasChanged();
     }
 }

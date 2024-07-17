@@ -1,5 +1,7 @@
 ﻿@using LMS.Services;
 @using LMS.Models;
+@using LMS.Pages;
+@inject IModalService model
 
 <div class="productDisplay">
     <p>@Product_Name </p>
@@ -32,12 +34,24 @@
     public EventCallback<string> OnProductMoved { get; set; }
 
     [Parameter]
-    public EventCallback<string> OnExpirationDateChanged { get; set; }
+    public EventCallback<DateOnly> OnExpirationDateChanged { get; set; }
+
 
     private async Task EditExpirationDate()
     {
-        await OnExpirationDateChanged.InvokeAsync(Product_Name);
-        StateHasChanged();
+        var parameters = new ModalParameters()
+        .Add(nameof(ExpirationDatePopup.ProductName), Product_Name)
+        .Add(nameof(ExpirationDatePopup.ExpirationDate), ExpirationDate);
+
+        var messageForm = model.Show<ExpirationDatePopup>("Edit Expiration Date", parameters);
+        var result = await messageForm.Result;
+
+        if (result.Confirmed)
+        {
+            ExpirationDate = (DateOnly) result.Data;
+            await OnExpirationDateChanged.InvokeAsync(ExpirationDate);
+            StateHasChanged();
+        }
     }
 
     private async Task RemoveQuantity()

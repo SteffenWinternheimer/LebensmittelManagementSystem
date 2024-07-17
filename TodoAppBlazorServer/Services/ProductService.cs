@@ -77,6 +77,24 @@ public class ProductService : IProductService
             return "Error";
         }
     }
+    
+    public static void UpdateExpirationDateToProduct(string productName, DateOnly expirationDate, ListTypesEnum.ListTypes listType)
+    {
+        switch (listType)
+        {
+            case ListTypesEnum.ListTypes.ShoppingList:
+                ShoppingList.Where(product => product.Product_Name.Equals(productName)).ToList().ForEach(product => product.ExpiryDate = expirationDate);
+                FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
+                ShoppingListToDictionary();
+                break;
+            case ListTypesEnum.ListTypes.FoodStock:
+                FoodStock.Where(product => product.Product_Name.Equals(productName)).ToList().ForEach(product => product.ExpiryDate = expirationDate);
+                FileHandler.SaveList(FoodStock, FOOD_STOCK);
+                FoodStockToDictionary();
+                break;
+        }
+    }
+
 
     public static bool RemoveProduct(string productName, ListTypesEnum.ListTypes listType)
     {
@@ -98,15 +116,16 @@ public class ProductService : IProductService
 
     public static void MoveProduct(string productName, ListTypesEnum.ListTypes listToMoveProductTo)
     {
+        Product productToMove = new Product();
         switch (listToMoveProductTo)
         {
             case ListTypesEnum.ListTypes.FoodStock:
-                AddItemToFoodStock(new Product(productName));
-                Console.WriteLine("Move Product to Food Stock");
+                productToMove = ShoppingList.Find(item => item.Product_Name.Equals(productName));
+                AddItemToFoodStock(productToMove);
                 break;
             case ListTypesEnum.ListTypes.ShoppingList:
-                AddItemToShoppingList(new Product(productName));
-                Console.WriteLine("Move Product to Shopping List");
+                productToMove = FoodStock.Find(item => item.Product_Name.Equals(productName));
+                AddItemToShoppingList(productToMove);
                 break;
         }
     }
