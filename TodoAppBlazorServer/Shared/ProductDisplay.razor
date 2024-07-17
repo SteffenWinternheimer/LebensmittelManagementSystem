@@ -3,7 +3,7 @@
 @using LMS.Pages;
 @inject IModalService model
 
-<div class="productDisplay">
+<div class="productDisplay @SetExpirationDateColorCoding()">
     <p>@Product_Name </p>
     <p>@Quantity</p>
     <p>@ExpirationDate</p>
@@ -35,6 +35,37 @@
 
     [Parameter]
     public EventCallback<DateOnly> OnExpirationDateChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        SetExpirationDateColorCoding();
+    }
+
+    private string SetExpirationDateColorCoding()
+    {        
+        DateOnly currentDate = DateOnly.FromDateTime(DateTime.Today);
+
+        if (ExpirationDate >= currentDate.AddDays(7)) // 7 - infinite days
+        {
+            return "expirationDateGreen";
+        }
+        else if (ExpirationDate >= currentDate.AddDays(3)) // 3 - 6 days
+        {
+            return "expirationDateYellow";
+        }
+        else if (ExpirationDate >= currentDate.AddDays(1)) // 1 - 2 days
+        {
+            return "expirationDateOrange";
+        }
+        else if (ExpirationDate == currentDate) // today
+        {
+            return "expirationDateRed"; 
+        }
+        else
+        {
+            return "expirationDatePurple"; // expired
+        }
+    }
 
 
     private async Task EditExpirationDate()

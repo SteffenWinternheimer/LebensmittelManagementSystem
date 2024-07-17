@@ -1,7 +1,27 @@
-﻿.productDisplay {
+﻿/* EXPIRATION DATES */
+.expirationDateGreen {
+    background-color: #b6ff00;
+}
+
+.expirationDateYellow {
+    background-color: #fffb00;
+}
+
+.expirationDateOrange {
+    background-color: #ff8c00;
+}
+
+.expirationDateRed {
+    background-color: #ff0000;
+}
+
+.expirationDatePurple {
+    background-color: #800080;
+}
+
+.productDisplay {
     border: 1px solid black;
     padding: 10px;
-    background-color: lightgray;
     float: left;
     margin-right: 10px;
     width: 250px;
@@ -9,6 +29,7 @@
     margin-bottom: 10px;
     position: relative;
 }
+
 
 .productDisplay p {
     text-align: center;
@@ -34,3 +55,4 @@
 .not-expired{
     background-color: #b6ff00;
 }
+
