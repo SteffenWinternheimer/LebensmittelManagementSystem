@@ -5,7 +5,7 @@ using LMS.Logic;
 using LMS;
 using Blazored.Modal;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder();
 
 string ipAddress = null;
 var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -39,7 +39,6 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-//Statistics.statisticsDic = FileHandler.LoadStatistics();
 ProductService.InitializeLists();
 Statistics.LoadStatistics();
 
