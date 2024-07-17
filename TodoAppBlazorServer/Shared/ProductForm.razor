@@ -1,40 +1,29 @@
 ﻿@using LMS.Services;
 @inject IProductService _todoService;
 
-<EditForm Model="@NewItem" OnSubmit="@ItemAdded">
+<EditForm Model="@Product" OnSubmit="@ItemAdded">
     <div style="display: flex; align-items: center; width: 400px;">
         <div style="margin-right: 10px">Text:</div>
-        <InputText @bind-Value="NewItem.Text" class="form-control" style="margin-right: 10px" id="Item" />
+        <InputText @bind-Value="Product.Product_Name" class="form-control" style="margin-right: 10px" id="Item" />
         <input type="submit" class="btn btn-primary" style="margin-right: 10px" value="Add" />
         <input type="reset" class="btn btn-secondary" value="Clear" />
     </div>
 </EditForm>
 
 @code {
+
+
     [Parameter]
-    public required Action OnItemAdded { get; set; }
+    public EventCallback<Product> OnItemAdded { get; set; }
 
-    private TodoItem NewItem = new TodoItem("");
-    
-    public void ItemAdded(Product item)
+    Product Product = new Product();
+
+
+    public async Task ItemAdded()
     {
-        _todoService.Add(item);
+        var newItem = new Product(Product.Product_Name);
+        Product = new Product();
 
-        if (OnItemAdded != null)
-        {
-            OnItemAdded();
-        }
-    }
-
-    public void ItemAdded()
-    {
-        var newItem = new Product(NewItem.Text);
-        NewItem.Text = "";
-        _todoService.Add(newItem);
-
-        if (OnItemAdded != null)
-        {
-            OnItemAdded();
-        }
+        await OnItemAdded.InvokeAsync(newItem);
     }
 }

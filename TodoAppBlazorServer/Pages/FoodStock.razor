@@ -4,9 +4,12 @@
 @using LMS.Models;
 @using LMS.Pages;
 
-<h3>FoodStock</h3>
+<h3>Food Stock</h3>
 <p>This page shows all of your products currently available in your food stock!</p>
-
+<div class="border" style="padding: 20px;">
+    <h4>New Product</h4>
+    <ProductForm OnItemAdded="@ItemAdded"></ProductForm>
+</div>
 
 @foreach (var product in ProductService.ProductQuantityFoodStock)
 {
@@ -14,6 +17,13 @@
 }
 
 @code {
+    private void ItemAdded(Product product)
+    {
+        if (product.Product_Name == null) return;
+        ProductService.AddItemToFoodStock(product);
+        StateHasChanged();
+        OnInitialized();
+    }
 
     private DateOnly GetLatestExpirationDate(string productName)
     {
