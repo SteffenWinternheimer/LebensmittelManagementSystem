@@ -1,0 +1,25 @@
+﻿@page "/expirationDatePopup"
+
+<p>Current Expiration Date: @ExpirationDate</p>
+<p>@ProductName</p>
+<InputDate Type="InputDateType.Date"
+           min="@DateTime.Today.ToString("dd-MM-yyyy")" @bind-Value="ExpirationDate"/>
+
+<button @onclick="SaveChanges" >Save changes</button>
+
+
+
+@code{
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter]
+    public string ProductName { get; set; }
+    [Parameter]
+    public DateOnly ExpirationDate { get; set; }
+
+
+    public async Task SaveChanges()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(ExpirationDate));
+    }
+}

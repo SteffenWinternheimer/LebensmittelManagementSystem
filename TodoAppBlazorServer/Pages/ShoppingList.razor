@@ -2,13 +2,14 @@
 @using LMS.Services;
 @using LMS.Shared;
 @using LMS.Models;
+@using LMS.Pages;
 
 <h3>ShoppingList</h3>
 
  
 @foreach(var product in ProductService.ProductQuantityShoppingList)
 {
-    <ProductDisplay Product_Name="@product.Key" ExpirationDate="@GetLatestExpirationDate(product.Key)" Quantity="@product.Value" OnExpirationDateChanged="@EditExpirationDate" OnProductRemoved="@RemoveProduct" OnProductMoved="@MoveProductToOtherList"/>
+    <ProductDisplay Product_Name="@product.Key" ExpirationDate="@GetLatestExpirationDate(product.Key)" Quantity="@product.Value" OnExpirationDateChanged="@(date => EditExpirationDate(product.Key,date))" OnProductRemoved="@RemoveProduct" OnProductMoved="@MoveProductToOtherList"/>
 } 
 
 
@@ -25,8 +26,9 @@
         ProductService.ShoppingListToDictionary();
     }
 
-    private void EditExpirationDate()
+    private void EditExpirationDate(string productName, DateOnly expirationDate)
     {
+        ProductService.UpdateExpirationDateToProduct(productName, expirationDate, ListTypesEnum.ListTypes.ShoppingList);
         StateHasChanged();
     }
 
@@ -38,9 +40,8 @@
 
     private void MoveProductToOtherList(string productName)
     {
-        RemoveProduct(productName);
-        Console.WriteLine("MoveProductToOtherList" + productName);
         ProductService.MoveProduct(productName, ListTypesEnum.ListTypes.FoodStock);
+        RemoveProduct(productName);
         StateHasChanged();
     }
 }
