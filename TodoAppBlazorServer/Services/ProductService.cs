@@ -148,6 +148,51 @@ public class ProductService : IProductService
         }
     }
 
+    public static bool MoveProductFromFoodStockToShoppingList(long barcode)
+    {
+        Product productToMove = MoveProduct(barcode, ListTypesEnum.ListTypes.ShoppingList);
+        if (productToMove == null) return false; 
+        RemoveProduct(productToMove, ListTypesEnum.ListTypes.FoodStock);
+        return true;
+    }
+
+
+    public static bool RemoveProduct(long barcode, ListTypesEnum.ListTypes listType)
+    {
+        Product productToRemove = null;
+        switch (listType)
+        {
+            case ListTypesEnum.ListTypes.ShoppingList:
+                productToRemove = ShoppingList.Find(x => x.Barcode == barcode);
+                if (productToRemove == null) return false;
+
+                if (productToRemove.Quantity == 1)
+                {
+                    ShoppingList.Remove(productToRemove);
+                    FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
+                    return true;
+                }
+                ShoppingList.Find(x => x.Equals(productToRemove)).Quantity--;
+                FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
+                return true;
+
+            case ListTypesEnum.ListTypes.FoodStock:
+                productToRemove = FoodStock.Find(x => x.Barcode == barcode);
+                if(productToRemove == null) return false;
+
+                if (productToRemove.Quantity == 1)
+                {
+                    FoodStock.Remove(productToRemove);
+                    FileHandler.SaveList(FoodStock, SHOPPING_LIST);
+                    return true;
+                }
+                FoodStock.Find(x => x.Equals(productToRemove)).Quantity--;
+                FileHandler.SaveList(FoodStock, SHOPPING_LIST);
+                return true;
+        }
+        return false;
+    }
+
 
     public static bool RemoveProduct(Product productToRemove, ListTypesEnum.ListTypes listType)
     {
@@ -176,6 +221,25 @@ public class ProductService : IProductService
                 return true;
         }
         return false;
+    }
+
+    public static Product MoveProduct(long barcode, ListTypesEnum.ListTypes listToMoveProductTo)
+    {
+        Product productToMove = null;
+        switch (listToMoveProductTo)
+        {
+            case ListTypesEnum.ListTypes.FoodStock:
+                productToMove = ShoppingList.Find(x => x.Barcode == barcode);
+                if (productToMove == null) return null;
+                AddItemToFoodStock(productToMove);
+                return productToMove;
+            case ListTypesEnum.ListTypes.ShoppingList:
+                productToMove = FoodStock.Find(x => x.Barcode == barcode);
+                if (productToMove == null) return null;
+                AddItemToShoppingList(FoodStock.Find(x => x.Barcode == barcode));
+                return productToMove;
+        }
+        return null;
     }
 
     public static void MoveProduct(Product productToMove, ListTypesEnum.ListTypes listToMoveProductTo)
@@ -264,6 +328,19 @@ public class ProductService : IProductService
         productList[0].Product_Name = newProductName;
         FileHandler.SaveProductToDatabase(productList[0]);
         return newProductName;
+    }
+
+    public static List<Product> SearchProduct(string searchString, ListTypesEnum.ListTypes listType)
+    {
+        switch (listType)
+        {
+            case ListTypesEnum.ListTypes.ShoppingList:
+                return ShoppingList.FindAll(x => x.Product_Name.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0);
+
+            case ListTypesEnum.ListTypes.FoodStock:
+                return FoodStock.FindAll(x => x.Product_Name.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+        return null;
     }
 
 

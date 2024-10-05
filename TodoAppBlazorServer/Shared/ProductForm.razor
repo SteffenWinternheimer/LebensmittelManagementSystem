@@ -11,13 +11,33 @@
     </div>
 </EditForm>
 
+<EditForm Model="@Product" OnSubmit="@SearchItem">
+    <div style="display: flex; align-items: center; width: 400px; margin-bottom: 20px;">
+        <div style="margin-right: 10px;">Search:</div>
+        <InputText @bind-Value="searchString" class="form-control" style="margin-right: 10px" id="Search" />
+        <input type="submit" class="btn btn-primary" style="margin-right: 10px" value="Search" />
+        <input type="reset" class="btn btn-secondary" value="Clear" @onclick="ClearSearch" />
+    </div>
+</EditForm>
+
+
+
+
 @code {
 
 
     [Parameter]
     public EventCallback<Product> OnItemAdded { get; set; }
 
+    [Parameter]
+    public EventCallback<string> OnItemSearched { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnItemSearchCleared { get; set; }
+
     Product Product = new Product();
+
+    string searchString;
 
 
     public async Task ItemAdded()
@@ -26,5 +46,18 @@
         Product = new Product();
 
         await OnItemAdded.InvokeAsync(newItem);
+    }
+
+    public async Task SearchItem()
+    {
+        string searchString = this.searchString;
+
+        await OnItemSearched.InvokeAsync(searchString);
+    }
+
+    private async Task ClearSearch()
+    {
+        searchString = string.Empty;
+        await OnItemSearchCleared.InvokeAsync(searchString);
     }
 }

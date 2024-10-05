@@ -68,5 +68,30 @@ namespace LMS.Logic
             ProductService.AddItemToFoodStock(product.Result);
             return Ok(product.Result.Product_Name);
         }
+
+        [HttpPost("MoveProductFromFoodStockToShoppingList")]
+        public IActionResult MoveProductFromFoodStockToShoppingList([FromBody] string data)
+        {
+            var response = new { receivedData = data };
+            bool IsSuccess = ProductService.MoveProductFromFoodStockToShoppingList(long.Parse(data));
+            if(IsSuccess)
+            {
+                return Ok("Product moved successfully!");
+            }
+            return BadRequest("Product not found in Food Stock!");
+        }
+
+
+        [HttpPost("DeleteProductFromFoodStock")]
+        public IActionResult DeleteProductFromFoodStock([FromBody] string data)
+        {
+            var response = new { receivedData = data };
+            bool IsSuccess = ProductService.RemoveProduct(long.Parse(data), Models.ListTypesEnum.ListTypes.FoodStock);
+            if (IsSuccess)
+            {
+                return Ok("Product removed successfully!");
+            }
+            return BadRequest("Product not found in Food Stock!");
+        }
     }
 }

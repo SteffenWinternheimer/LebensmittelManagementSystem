@@ -4,10 +4,21 @@
 @using LMS.Pages;
 
 
-<ProductForm OnItemAdded="@ItemAdded"></ProductForm>
-@foreach (Product product in FoodList)
+<ProductForm OnItemAdded="@ItemAdded" OnItemSearched="@ItemSearched" OnItemSearchCleared="@ClearItemSearch"></ProductForm>
+
+@if (!isSearchingForProduct)
 {
-    <ProductDisplay Product="@product"OnProductRemoved="@RemoveProduct" OnProductRenamed="@(newName => RenameProductName(product.Product_Name, newName))" OnExpirationDateChanged="@(date => EditExpirationDate(product.Product_Name,date))" OnProductMoved="@MoveProductToOtherList" />
+    @foreach (Product product in FoodList)
+    {
+        <ProductDisplay Product="@product"OnProductRemoved="@RemoveProduct" OnProductRenamed="@(newName => RenameProductName(product.Product_Name, newName))" OnExpirationDateChanged="@(date => EditExpirationDate(product.Product_Name,date))" OnProductMoved="@MoveProductToOtherList" />
+    }
+}
+else
+{
+    @foreach (Product product in SearchedProducts)
+    {
+        <ProductDisplay Product="@product" OnProductRemoved="@RemoveProduct" OnProductRenamed="@(newName => RenameProductName(product.Product_Name, newName))" OnExpirationDateChanged="@(date => EditExpirationDate(product.Product_Name,date))" OnProductMoved="@MoveProductToOtherList" />
+    }
 }
 
 @code {
@@ -20,14 +31,37 @@
     [Parameter]
     public ListTypesEnum.ListTypes Other_ListType { get; set; }
 
+    [Parameter]
+    public List<Product> SearchedProducts { get; set; }
+
+    bool isSearchingForProduct = false;
+
     private void ItemAdded(Product product)
     {
         if (product.Product_Name == null) return;
+
         if(This_ListType == ListTypesEnum.ListTypes.ShoppingList) ProductService.AddItemToShoppingList(product);
         else ProductService.AddItemToFoodStock(product);
         StateHasChanged();
         OnInitialized();
     }
+
+
+    private void ItemSearched(string searchString)
+    {
+        if (searchString == null) return;
+        isSearchingForProduct = true;
+        SearchedProducts = ProductService.SearchProduct(searchString, This_ListType);
+        StateHasChanged();
+    }
+
+    private void ClearItemSearch()
+    {
+        isSearchingForProduct = false;
+        SearchedProducts = new List<Product>();
+        StateHasChanged();
+    }
+
 
     private long GetUPC(Product product)
     {
@@ -47,7 +81,7 @@
 
     protected override void OnInitialized()
     {
-
+        isSearchingForProduct = false;
     }
 
     private void EditExpirationDate(string productName, DateOnly expirationDate)
