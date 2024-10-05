@@ -1,0 +1,23 @@
+﻿@page "/renameProductPopup"
+
+<p>@ProductName</p>
+<InputText @bind-Value="NewProductName"/>
+
+<button @onclick="SaveChanges" >Save changes</button>
+
+
+
+@code{
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter]
+    public string ProductName { get; set; }
+    [Parameter]
+    public string NewProductName { get; set; }
+
+
+    public async Task SaveChanges()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(NewProductName));
+    }
+}

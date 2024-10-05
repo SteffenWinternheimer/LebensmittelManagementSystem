@@ -3,14 +3,16 @@
 @using LMS.Pages;
 @inject IModalService model
 
-<div class="productDisplay @SetExpirationDateColorCoding()">
-    <p>@Product_Name </p>
-    <p>@Quantity</p>
-    <p>@ExpirationDate</p>
+<div style="margin-top: 30px" class="productDisplay @SetExpirationDateColorCoding() ">
+    <p>@Product.Product_Name </p>
+    <p>@Product.Quantity</p>
+    <p>@Product.ExpiryDate</p>
+    <p>@Product.Barcode</p>
 
         <div class="buttonContainer">
             <button @onclick="RemoveQuantity"><i class="material-icons">delete</i></button>
             <button @onclick="EditExpirationDate"><i class="material-icons">edit_calendar</i></button>
+            <button @onclick="RenameProduct"><i class="material-icons">edit</i></button>
             <button @onclick="MoveProduct"><i class="material-icons">input</i></button>
         </div>
  
@@ -19,19 +21,16 @@
 
 @code {
     [Parameter]
-    public string? Product_Name { get; set; }
+    public Product? Product{ get; set; }
 
     [Parameter]
-    public int Quantity { get; set; }
+    public EventCallback<Product> OnProductRemoved { get; set; }
 
     [Parameter]
-    public DateOnly ExpirationDate { get; set; }
+    public EventCallback<Product> OnProductMoved { get; set; }
 
     [Parameter]
-    public EventCallback<string> OnProductRemoved { get; set; }
-
-    [Parameter]
-    public EventCallback<string> OnProductMoved { get; set; }
+    public EventCallback<string> OnProductRenamed { get; set; }
 
     [Parameter]
     public EventCallback<DateOnly> OnExpirationDateChanged { get; set; }
@@ -45,19 +44,19 @@
     {        
         DateOnly currentDate = DateOnly.FromDateTime(DateTime.Today);
 
-        if (ExpirationDate >= currentDate.AddDays(7)) // 7 - infinite days
+        if (Product.ExpiryDate >= currentDate.AddDays(7)) // 7 - infinite days
         {
             return "expirationDateGreen";
         }
-        else if (ExpirationDate >= currentDate.AddDays(3)) // 3 - 6 days
+        else if (Product.ExpiryDate >= currentDate.AddDays(3)) // 3 - 6 days
         {
             return "expirationDateYellow";
         }
-        else if (ExpirationDate >= currentDate.AddDays(1)) // 1 - 2 days
+        else if (Product.ExpiryDate >= currentDate.AddDays(1)) // 1 - 2 days
         {
             return "expirationDateOrange";
         }
-        else if (ExpirationDate == currentDate) // today
+        else if (Product.ExpiryDate == currentDate) // today
         {
             return "expirationDateRed"; 
         }
@@ -68,32 +67,48 @@
     }
 
 
+    private async Task RenameProduct()
+    {
+        var parameters = new ModalParameters()
+        .Add(nameof(RenameProductPopup.ProductName), Product.Product_Name);
+
+        var messageForm = model.Show<RenameProductPopup>("Rename Product", parameters);
+        var result = await messageForm.Result;
+
+        if (result.Confirmed)
+        {
+            Product.Product_Name = (string)result.Data;
+            await OnProductRenamed.InvokeAsync(Product.Product_Name);
+            StateHasChanged();
+        }
+    }
+
     private async Task EditExpirationDate()
     {
         var parameters = new ModalParameters()
-        .Add(nameof(ExpirationDatePopup.ProductName), Product_Name)
-        .Add(nameof(ExpirationDatePopup.ExpirationDate), ExpirationDate);
+        .Add(nameof(ExpirationDatePopup.ProductName), Product.Product_Name)
+        .Add(nameof(ExpirationDatePopup.ExpirationDate), Product.ExpiryDate);
 
         var messageForm = model.Show<ExpirationDatePopup>("Edit Expiration Date", parameters);
         var result = await messageForm.Result;
 
         if (result.Confirmed)
         {
-            ExpirationDate = (DateOnly) result.Data;
-            await OnExpirationDateChanged.InvokeAsync(ExpirationDate);
+            Product.ExpiryDate = (DateOnly)result.Data;
+            await OnExpirationDateChanged.InvokeAsync(Product.ExpiryDate);
             StateHasChanged();
         }
     }
 
     private async Task RemoveQuantity()
     {
-        await OnProductRemoved.InvokeAsync(Product_Name);
+        await OnProductRemoved.InvokeAsync(Product);
         StateHasChanged();
     }
 
     private async Task MoveProduct()
     {
-        await OnProductMoved.InvokeAsync(Product_Name);
+        await OnProductMoved.InvokeAsync(Product);
         StateHasChanged();
     }
 

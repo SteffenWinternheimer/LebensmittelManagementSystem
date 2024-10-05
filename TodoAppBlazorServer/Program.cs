@@ -17,7 +17,7 @@ foreach (var ip in host.AddressList)
     }
 }
 string url = "http://" + ipAddress + ":5003";
-builder.WebHost.UseUrls(url, "http://localhost:5001");
+builder.WebHost.UseUrls(url);
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();

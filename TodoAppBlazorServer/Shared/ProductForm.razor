@@ -1,9 +1,10 @@
 ﻿@using LMS.Services;
 @inject IProductService _todoService;
 
+<h4>New Product</h4>
 <EditForm Model="@Product" OnSubmit="@ItemAdded">
-    <div style="display: flex; align-items: center; width: 400px;">
-        <div style="margin-right: 10px">Text:</div>
+    <div style="display: flex; align-items: center; width: 400px; margin-bottom: 20px;">
+        <div style="margin-right: 10px">Product:</div>
         <InputText @bind-Value="Product.Product_Name" class="form-control" style="margin-right: 10px" id="Item" />
         <input type="submit" class="btn btn-primary" style="margin-right: 10px" value="Add" />
         <input type="reset" class="btn btn-secondary" value="Clear" />
@@ -21,7 +22,7 @@
 
     public async Task ItemAdded()
     {
-        var newItem = new Product(Product.Product_Name);
+        var newItem = new Product(Product.Product_Name,0, DateOnly.FromDateTime(DateTime.Today));
         Product = new Product();
 
         await OnItemAdded.InvokeAsync(newItem);

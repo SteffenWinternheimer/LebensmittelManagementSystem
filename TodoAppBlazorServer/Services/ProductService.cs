@@ -4,6 +4,8 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Web;
 using LMS.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Newtonsoft.Json;
 
 namespace LMS.Services;
 
@@ -12,9 +14,6 @@ public class ProductService : IProductService
     public static List<Product> ProductList = new List<Product>();
     public static List<Product> ShoppingList = new List<Product>();
     public static List<Product> FoodStock = new List<Product>();
-
-    public static Dictionary<string, int> ProductQuantityShoppingList = new Dictionary<string, int>();
-    public static Dictionary<string, int> ProductQuantityFoodStock = new Dictionary<string, int>();
 
     public const string SHOPPING_LIST = "ShoppingList";
     public const string FOOD_STOCK = "FoodStock";
@@ -25,21 +24,75 @@ public class ProductService : IProductService
         ShoppingList = new List<Product>(LoadShoppingList());
     }
 
-    public static async Task<string> GET_Request(string barcodeID)
+    public static async Task<Product> GET_Request_Spoonacular(string barcodeID)
     {
         using (var client = new HttpClient())
         {
-            using (var response = await client.GetAsync("https://world.openfoodfacts.net/api/v2/product/" + barcodeID))
+            // Erste API (Spoonacular)
+            var response1 = await client.GetAsync("https://api.spoonacular.com/food/products/upc/" + barcodeID + "?apiKey=16ad760ce37d4c27923d46678fedaa1c");
+
+            string result = await response1.Content.ReadAsStringAsync();
+            if (result.Contains("failure"))
             {
-                return await response.Content.ReadAsStringAsync();
+                return null;
             }
+            JObject jObject = ConvertJsonStringToJsonObject(result);
+
+            Product product = new Product();
+            //product name - german
+            product.Product_Name = (string)jObject.SelectToken("$.title");
+            product.Barcode = long.Parse(barcodeID);
+            product.Quantity = 1;
+            product.ExpiryDate = DateOnly.FromDateTime(DateTime.Today);
+            return product;
+        }
+    }
+
+
+
+    public static async Task<Product> GET_Request_OpenFoodFacts(string barcodeID)
+    {
+        using (var client = new HttpClient())
+        {
+            // Erste API (Spoonacular)
+            var response2 = await client.GetAsync("https://world.openfoodfacts.net/api/v2/product/" + barcodeID);
+            string result = await response2.Content.ReadAsStringAsync();
+            if (result.Contains("502 Bad Gateway")) return null;
+            JObject jObject = ConvertJsonStringToJsonObject(result);
+            int status = Convert.ToInt32((string)jObject.SelectToken("$.status"));
+            if (status == 0) return null;
+
+            Product product = new Product();
+            //product name - german
+            string productName = (string)jObject.SelectToken("$.product.product_name_de");
+
+            if (productName == null)
+            {
+                productName = (string)jObject.SelectToken("$.product.product_name_fr");
+                productName = Translate(productName);
+            }
+            product.Product_Name = productName;
+            product.Barcode = long.Parse(barcodeID);
+            product.Quantity = 1;
+            product.ExpiryDate = DateOnly.FromDateTime(DateTime.Today);
+            return product;
         }
     }
 
     public static JObject ConvertJsonStringToJsonObject(string jsonString)
     {
-        return JObject.Parse(jsonString);
+        try
+        {
+            return JObject.Parse(jsonString);
+        }
+        catch (JsonReaderException ex)
+        {
+            // Log the exception and the invalid JSON string
+            Console.WriteLine($"Invalid JSON string: {jsonString}");
+            throw new Exception("Failed to parse JSON", ex);
+        }
     }
+
 
     public static Product ConvertJSONToProduct(JObject jObject)
     {
@@ -85,47 +138,55 @@ public class ProductService : IProductService
             case ListTypesEnum.ListTypes.ShoppingList:
                 ShoppingList.Where(product => product.Product_Name.Equals(productName)).ToList().ForEach(product => product.ExpiryDate = expirationDate);
                 FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
-                ShoppingListToDictionary();
+                //ShoppingListToDictionary();
                 break;
             case ListTypesEnum.ListTypes.FoodStock:
                 FoodStock.Where(product => product.Product_Name.Equals(productName)).ToList().ForEach(product => product.ExpiryDate = expirationDate);
                 FileHandler.SaveList(FoodStock, FOOD_STOCK);
-                FoodStockToDictionary();
+                //FoodStockToDictionary();
                 break;
         }
     }
 
 
-    public static bool RemoveProduct(string productName, ListTypesEnum.ListTypes listType)
+    public static bool RemoveProduct(Product productToRemove, ListTypesEnum.ListTypes listType)
     {
         switch (listType)
         {
             case ListTypesEnum.ListTypes.ShoppingList:
-                ShoppingList.Remove(ShoppingList.Find(item => item.Product_Name.Equals(productName)));
+                if(productToRemove.Quantity == 1)
+                {
+                    ShoppingList.Remove(productToRemove);
+                    FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
+                    return true;
+                }
+                ShoppingList.Find(x => x.Equals(productToRemove)).Quantity--;
                 FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
-                ShoppingListToDictionary();
                 return true;
+                
             case ListTypesEnum.ListTypes.FoodStock:
-                FoodStock.Remove(FoodStock.Find(item => item.Product_Name.Equals(productName)));
-                FileHandler.SaveList(FoodStock, FOOD_STOCK);
-                FoodStockToDictionary();
+                if (productToRemove.Quantity == 1)
+                {
+                    FoodStock.Remove(productToRemove);
+                    FileHandler.SaveList(FoodStock, SHOPPING_LIST);
+                    return true;
+                }
+                FoodStock.Find(x => x.Equals(productToRemove)).Quantity--;
+                FileHandler.SaveList(FoodStock, SHOPPING_LIST);
                 return true;
         }
         return false;
     }
 
-    public static void MoveProduct(string productName, ListTypesEnum.ListTypes listToMoveProductTo)
+    public static void MoveProduct(Product productToMove, ListTypesEnum.ListTypes listToMoveProductTo)
     {
-        Product productToMove = new Product();
         switch (listToMoveProductTo)
         {
             case ListTypesEnum.ListTypes.FoodStock:
-                productToMove = ShoppingList.Find(item => item.Product_Name.Equals(productName));
-                AddItemToFoodStock(productToMove);
+                AddItemToFoodStock(ShoppingList.Find(x => x.Equals(productToMove)));
                 break;
             case ListTypesEnum.ListTypes.ShoppingList:
-                productToMove = FoodStock.Find(item => item.Product_Name.Equals(productName));
-                AddItemToShoppingList(productToMove);
+                AddItemToShoppingList(FoodStock.Find(x => x.Equals(productToMove)));
                 break;
         }
     }
@@ -135,7 +196,16 @@ public class ProductService : IProductService
     {
         Statistics.IncrementTotalScannedProducts();
         Statistics.IncrementTotalScannedProductsFoodStock();
-        FoodStock.Add(item);
+        List<Product> productsFromDatabase = new List<Product>(FileHandler.GetProductsFromDatabase());
+
+        if (!productsFromDatabase.Exists(x => x.Barcode == item.Barcode))
+        {
+            productsFromDatabase.Add(item);
+            FileHandler.SaveProductToDatabase(item);
+        }
+        if (!FoodStock.Exists(x => x.Barcode == item.Barcode)) FoodStock.Add(productsFromDatabase.Find(x => x.Barcode == item.Barcode));
+        else FoodStock.Find(x => x.Barcode == item.Barcode).Quantity++;
+
         FileHandler.SaveList(FoodStock, FOOD_STOCK);
     }
 
@@ -143,7 +213,16 @@ public class ProductService : IProductService
     {
         Statistics.IncrementTotalScannedProducts();
         Statistics.IncrementTotalScannedProductsShoppingList();
-        ShoppingList.Add(item);
+        List<Product> productsFromDatabase = new List<Product>(FileHandler.GetProductsFromDatabase());
+        
+        if(!productsFromDatabase.Exists(x => x.Barcode == item.Barcode))
+        {
+            productsFromDatabase.Add(item);
+            FileHandler.SaveProductToDatabase(item);
+        }
+        if(!ShoppingList.Exists(x => x.Barcode == item.Barcode)) ShoppingList.Add(productsFromDatabase.Find(x => x.Barcode == item.Barcode));
+        else ShoppingList.Find(x => x.Barcode == item.Barcode).Quantity++;
+        
         FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
     }
 
@@ -166,6 +245,39 @@ public class ProductService : IProductService
         return FoodStock;
     }
 
+
+    public static string RenameProduct(string productName, string newProductName, ListTypesEnum.ListTypes listType)
+    {
+        List<Product> productList = new List<Product>();
+        switch (listType)
+        {
+            case ListTypesEnum.ListTypes.ShoppingList:
+                productList = GetShoppingList().Where(product => product.Product_Name.Equals(productName)).ToList();
+                FileHandler.SaveList(ShoppingList, SHOPPING_LIST);
+                break;
+
+            case ListTypesEnum.ListTypes.FoodStock:
+                productList = GetFoodStock().Where(product => product.Product_Name.Equals(productName)).ToList();
+                FileHandler.SaveList(FoodStock, FOOD_STOCK);
+                break;
+        }
+        productList[0].Product_Name = newProductName;
+        FileHandler.SaveProductToDatabase(productList[0]);
+        return newProductName;
+    }
+
+
+    public static long GetUPC(Product product, ListTypesEnum.ListTypes listType)
+    {
+        switch (listType)
+        {
+            case ListTypesEnum.ListTypes.ShoppingList:
+                return ShoppingList.First(x => x.Equals(product)).Barcode;// GetShoppingList().Where(product => product.Product_Name.Equals(productName)).ToList();
+            default:
+                return FoodStock.First(x => x.Equals(product)).Barcode;// GetShoppingList().Where(product => product.Product_Name.Equals(productName)).ToList();
+        }
+    }
+
     public static DateOnly GetLatestExpirationDate(string productName, ListTypesEnum.ListTypes listType)
     {
         List<Product> productList = new List<Product>();
@@ -179,7 +291,7 @@ public class ProductService : IProductService
                 productList = GetFoodStock().Where(product => product.Product_Name.Equals(productName)).ToList();
                 break;
         }
-
+        if (productList.Count == 0) return DateOnly.MinValue;
         DateOnly latestExpirationDate = productList[0].ExpiryDate;
         foreach (var product in productList)
         {
@@ -189,36 +301,6 @@ public class ProductService : IProductService
             }
         }
         return latestExpirationDate;
-    }
-
-
-    public static void ShoppingListToDictionary()
-    {
-        ProductQuantityShoppingList.Clear();
-        //find diplicates in shopping list (Product_Name)
-        var duplicates = ShoppingList.GroupBy(x => x.Product_Name)
-            .Where(group => group.Count() > 0)
-            .Select(group => group.Key);
-        //show quantity of duplicates and product name of each duplicate
-        foreach ( var item in duplicates) {
-            int quantity = ShoppingList.Count(x => x.Product_Name == item);
-            ProductQuantityShoppingList.Add(item.ToString(), quantity);
-        }
-    }
-
-    public static void FoodStockToDictionary()
-    {
-        ProductQuantityFoodStock.Clear();
-        //find diplicates in shopping list (Product_Name)
-        var duplicates = FoodStock.GroupBy(x => x.Product_Name)
-            .Where(group => group.Count() > 0)
-            .Select(group => group.Key);
-        //show quantity of duplicates and product name of each duplicate
-        foreach (var item in duplicates)
-        {
-            int quantity = FoodStock.Count(x => x.Product_Name == item);
-            ProductQuantityFoodStock.Add(item.ToString(), quantity);
-        }
     }
 
     public void Add(Product item)

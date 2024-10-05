@@ -28,6 +28,42 @@ namespace LMS.Logic
             File.WriteAllText("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\" + listName + ".json", json);
         }
 
+
+        public static void SaveProductToDatabase(Product product)
+        {
+            List<Product> productsInDatabase = GetProductsFromDatabase();
+            if(productsInDatabase.Exists(x => x.Barcode == product.Barcode))
+            {
+                Product productToUpdate = productsInDatabase.First(x =>  x.Barcode == product.Barcode);
+                productToUpdate.Product_Name = product.Product_Name;
+            }
+            else
+            {
+                productsInDatabase.Add(product);
+            }
+            string json = JsonConvert.SerializeObject(productsInDatabase);
+            File.WriteAllText("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\Database.json", json);
+        }
+
+        public static List<Product> GetProductsFromDatabase()
+        {
+            if (!File.Exists("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\Database.json"))
+            {
+                string json = JsonConvert.SerializeObject(new List<Product>());
+                File.WriteAllText("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\Database.json", json);
+                return new List<Product>();
+            }
+            string fileContent = File.ReadAllText("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\Database.json");
+            JArray jArrayList = JArray.Parse(fileContent);
+            List<Product> productList = new List<Product>();
+            foreach (JObject jObject in jArrayList)
+            {
+                productList.Add(jObject.ToObject<Product>());
+            }
+            return productList;
+        }
+
+
         public static List<Product> LoadList(string listName)
         {
             if (!File.Exists("F:\\TH-Bingen\\_Bachelorarbeit\\User_Data\\" + listName + ".json"))

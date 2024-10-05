@@ -1,0 +1,70 @@
+﻿@using LMS.Services;
+@using LMS.Shared;
+@using LMS.Models;
+@using LMS.Pages;
+
+
+<ProductForm OnItemAdded="@ItemAdded"></ProductForm>
+@foreach (Product product in FoodList)
+{
+    <ProductDisplay Product="@product"OnProductRemoved="@RemoveProduct" OnProductRenamed="@(newName => RenameProductName(product.Product_Name, newName))" OnExpirationDateChanged="@(date => EditExpirationDate(product.Product_Name,date))" OnProductMoved="@MoveProductToOtherList" />
+}
+
+@code {
+    [Parameter]
+    public List<Product> FoodList{ get; set; }
+
+    [Parameter]
+    public ListTypesEnum.ListTypes This_ListType { get; set; }
+
+    [Parameter]
+    public ListTypesEnum.ListTypes Other_ListType { get; set; }
+
+    private void ItemAdded(Product product)
+    {
+        if (product.Product_Name == null) return;
+        if(This_ListType == ListTypesEnum.ListTypes.ShoppingList) ProductService.AddItemToShoppingList(product);
+        else ProductService.AddItemToFoodStock(product);
+        StateHasChanged();
+        OnInitialized();
+    }
+
+    private long GetUPC(Product product)
+    {
+        return ProductService.GetUPC(product, This_ListType);
+    }
+
+    private DateOnly GetLatestExpirationDate(string productName)
+    {
+        return ProductService.GetLatestExpirationDate(productName, This_ListType);
+    }
+
+    private void RenameProductName(string productName, string newProductName)
+    {
+        ProductService.RenameProduct(productName, newProductName, This_ListType);
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+
+    }
+
+    private void EditExpirationDate(string productName, DateOnly expirationDate)
+    {
+        ProductService.UpdateExpirationDateToProduct(productName, expirationDate, This_ListType);
+        StateHasChanged();
+    }
+
+    private void RemoveProduct(Product productToRemove)
+    {
+        ProductService.RemoveProduct(productToRemove, This_ListType);
+    }
+
+    private void MoveProductToOtherList(Product product)
+    {
+        ProductService.MoveProduct(product, Other_ListType);
+        RemoveProduct(product);
+        StateHasChanged();
+    }
+}

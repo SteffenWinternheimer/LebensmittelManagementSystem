@@ -7,57 +7,5 @@
 <h3>Shopping List</h3>
 <p>This page shows all of your products currently available in your shopping list!</p>
 <div class="border" style="padding: 20px;">
-    <h4>New Product</h4>
-    <ProductForm OnItemAdded="@ItemAdded"></ProductForm>
+    <ListDisplay FoodList="ProductService.ShoppingList" This_ListType="ListTypesEnum.ListTypes.ShoppingList" Other_ListType="ListTypesEnum.ListTypes.FoodStock"></ListDisplay>
 </div>
- 
-@foreach(var product in ProductService.ProductQuantityShoppingList)
-{
-    <ProductDisplay Product_Name="@product.Key" ExpirationDate="@GetLatestExpirationDate(product.Key)" Quantity="@product.Value" OnExpirationDateChanged="@(date => EditExpirationDate(product.Key,date))" OnProductRemoved="@RemoveProduct" OnProductMoved="@MoveProductToOtherList"/>
-} 
-
-@code {
-    private void ItemAdded(Product product)
-    {
-        if (product.Product_Name == null) return;
-        ProductService.AddItemToShoppingList(product);
-        StateHasChanged();
-        OnInitialized();
-    }
-
-    public void ItemsChanged()
-    {
-        StateHasChanged();
-    }
-
-
-    private DateOnly GetLatestExpirationDate(string productName)
-    {
-        return ProductService.GetLatestExpirationDate(productName, ListTypesEnum.ListTypes.ShoppingList);
-    }
-
-
-    protected override void OnInitialized()
-    {
-        ProductService.ShoppingListToDictionary();
-    }
-
-    private void EditExpirationDate(string productName, DateOnly expirationDate)
-    {
-        ProductService.UpdateExpirationDateToProduct(productName, expirationDate, ListTypesEnum.ListTypes.ShoppingList);
-        StateHasChanged();
-    }
-
-    private void RemoveProduct(string productName)
-    {
-        ProductService.RemoveProduct(productName, ListTypesEnum.ListTypes.ShoppingList);
-        StateHasChanged();
-    }
-
-    private void MoveProductToOtherList(string productName)
-    {
-        ProductService.MoveProduct(productName, ListTypesEnum.ListTypes.FoodStock);
-        RemoveProduct(productName);
-        StateHasChanged();
-    }
-}
