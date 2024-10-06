@@ -148,6 +148,32 @@ public class ProductService : IProductService
         }
     }
 
+    public static List<Product> SortListByName(List<Product> listToSort)
+    {
+        listToSort.Sort(CompareProductsByName);
+        return listToSort;
+    }
+
+
+    static int CompareProductsByName(Product product1, Product product2)
+    {
+        if (product1?.Product_Name == null || product2?.Product_Name == null) return 0;
+        return product1.Product_Name.CompareTo(product2.Product_Name);
+    }
+
+    public static List<Product> SortListByExpirationDate(List<Product> listToSort)
+    {
+        listToSort.Sort(CompareProductsByExpirationDate);
+        return listToSort;
+    }
+
+    static int CompareProductsByExpirationDate(Product product1, Product product2)
+    {
+        if (product1?.ExpiryDate == null || product2?.ExpiryDate == null) return 0;
+        return product1.ExpiryDate.CompareTo(product2.ExpiryDate);
+    }
+
+
     public static bool MoveProductFromFoodStockToShoppingList(long barcode)
     {
         Product productToMove = MoveProduct(barcode, ListTypesEnum.ListTypes.ShoppingList);

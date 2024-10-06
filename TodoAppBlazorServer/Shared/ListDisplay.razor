@@ -6,6 +6,17 @@
 
 <ProductForm OnItemAdded="@ItemAdded" OnItemSearched="@ItemSearched" OnItemSearchCleared="@ClearItemSearch"></ProductForm>
 
+<div>
+    <label>
+        <input type="radio" name="sortList" value=1 bind="sortedOption" @onchange="OnOptionChanged" /> Name
+    </label>
+    <label>
+        <input type="radio" name="sortList" value=2 bind="sortedOption" @onchange="OnOptionChanged" /> MHD
+    </label>
+</div>
+
+
+
 @if (!isSearchingForProduct)
 {
     @foreach (Product product in FoodList)
@@ -22,6 +33,8 @@ else
 }
 
 @code {
+    private int sortedOption = 1;
+
     [Parameter]
     public List<Product> FoodList{ get; set; }
 
@@ -35,6 +48,28 @@ else
     public List<Product> SearchedProducts { get; set; }
 
     bool isSearchingForProduct = false;
+
+
+    // Method that will be triggered when the radio button selection changes
+    private void OnOptionChanged(ChangeEventArgs e)
+    {
+        sortedOption = int.Parse(e.Value.ToString());
+        SortListBySelection();
+    }
+
+    private void SortListBySelection()
+    {
+        switch(sortedOption)
+        {
+            case 1:
+                FoodList = ProductService.SortListByName(FoodList);
+                break;
+            case 2:
+                FoodList = ProductService.SortListByExpirationDate(FoodList);
+                break;
+        }
+    }
+
 
     private void ItemAdded(Product product)
     {

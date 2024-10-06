@@ -42,7 +42,7 @@
 
     public async Task ItemAdded()
     {
-        var newItem = new Product(Product.Product_Name,0, DateOnly.FromDateTime(DateTime.Today));
+        var newItem = new Product(Product.Product_Name,999, DateOnly.FromDateTime(DateTime.Today));
         Product = new Product();
 
         await OnItemAdded.InvokeAsync(newItem);
